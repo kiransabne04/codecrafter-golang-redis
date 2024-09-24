@@ -49,23 +49,27 @@ type Record struct {
 
 // initializes the new server with default config or opts
 func NewServer() *Server {
+	var masterHost, masterPort string
+	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
 
 	server := &Server{}
 	if *replicaof == "" {
 		server.Role = "master"
+		server.MasterHost = *addr
+		server.MasterPort = *port
 	} else {
 		server.Role = "slave"
+		server.MasterHost = masterHost
+		server.MasterPort = masterPort
+		server.HandShakeCommand()
 	}
 	// if replicaof is provided then take masterHost & masterPort
-	var masterHost, masterPort string
-	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
 
 	server.Stats = ServerStats{}
 	server.DataStore = make(map[string]*Record)
 	server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
 	server.MasterReplOffset = 0
-	server.MasterHost = masterHost
-	server.MasterPort = masterPort
+	
 
 	fmt.Println("masterHost & port -> ", masterHost, masterPort)
 	return server
@@ -145,8 +149,5 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 	}
-	if s.Role == "slave" {
-		fmt.Println("slave handshake")
-		s.HandShakeCommand(conn)
-	}
+	
 }
