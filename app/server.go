@@ -27,7 +27,7 @@ func main() {
 			os.Exit(1)
 		}
 		
-		go handleConn(conn)
+		handleConn(conn)
 	}
 }
 
