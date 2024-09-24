@@ -49,29 +49,15 @@ type Record struct {
 
 // initializes the new server with default config or opts
 func NewServer() *Server {
-	var masterHost, masterPort string
-	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
-
+	
 	server := &Server{}
-	if *replicaof == "" {
-		server.Role = "master"
-		server.MasterHost = *addr
-		server.MasterPort = *port
-	} else {
-		server.Role = "slave"
-		server.MasterHost = masterHost
-		server.MasterPort = masterPort
-		server.HandShakeCommand()
-	}
+	
 	// if replicaof is provided then take masterHost & masterPort
 
 	server.Stats = ServerStats{}
 	server.DataStore = make(map[string]*Record)
 	server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
 	server.MasterReplOffset = 0
-	
-
-	fmt.Println("masterHost & port -> ", masterHost, masterPort)
 	return server
 }
 
@@ -93,6 +79,7 @@ func (s *Server) startServer (addr string) error {
 			continue
 		}
 		go s.handleConn(conn)
+		
 	}
 
 }
@@ -118,9 +105,27 @@ func main() {
 	// }
 	server := NewServer()
 
+	var masterHost, masterPort string
+	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
+
+	if *replicaof == "" {
+		server.Role = "master"
+		server.MasterHost = *addr
+		server.MasterPort = *port
+	} else {
+		server.Role = "slave"
+		server.MasterHost = masterHost
+		server.MasterPort = masterPort
+		
+	}
+
 	if err := server.startServer(fmt.Sprintf("%s:%s", *addr, *port)); err != nil {
 		fmt.Println("error starting the server ", err)
 		os.Exit(1)
+	}
+
+	if server.Role == "slave" {
+		server.HandShakeCommand()
 	}
 
 }
@@ -149,5 +154,6 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 	}
+	
 	
 }
