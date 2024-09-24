@@ -189,7 +189,8 @@ func (s *Server) InfoCommand(c net.Conn, args []string) string {
 	return fmt.Sprintf("$%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
 }
 
-func (s *Server)HandShakeCommand(c net.Conn) string {
+func (s *Server)HandShakeCommand() string {
+	fmt.Println(" HandShakeCommand called")
 	return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
 }
 
