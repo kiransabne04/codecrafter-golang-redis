@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -27,11 +28,17 @@ func main() {
 			continue
 		}
 		
-		handleConn(conn)
+		go handleConn(conn)
 	}
 }
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	conn.Write([]byte("+PONG\r\n"))
+	reader := bufio.NewReader(conn)
+	for {
+		fmt.Println("reader -> ", reader)
+		conn.Write([]byte("+PONG\r\n"))
+	}
+
+	
 }
