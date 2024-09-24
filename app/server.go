@@ -1,64 +1,111 @@
 package main
 
 import (
+	"bufio"
+	"flag"
 	"fmt"
+	"io"
 	"net"
 	"os"
 )
 
-// Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
-var _ = net.Listen
-var _ = os.Exit
+// inputs for command cli flags
+var (
+	port = flag.String("port", "6379", "port number to connect on")
+	addr = flag.String("addr", "0.0.0.0", "addressr to connect on") 
+)
+
+// server struct containing server properties & stats
+type Server struct {
+	Role string
+	Listener net.Listener
+	Stats ServerStats
+}
+
+// serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
+type ServerStats struct {
+	ConnectionCount int
+	CommandsProcessed int
+}
+
+// initializes the new server with default config or opts
+func NewServer() *Server {
+	return &Server{
+		Role: "master",
+		Stats: ServerStats{},
+	}
+}
+
+// start server function starts the server and listens to tge mentioned port
+func (s *Server) startServer (addr string) error {
+	var err error
+	fmt.Println("Server is starting to initialize")
+
+	s.Listener, err = net.Listen("tcp", addr)
+	if err != nil {
+		fmt.Sprintf("failed to bind port %s \n", addr)
+		return err
+	}
+	for {
+		conn, err := s.Listener.Accept()
+		if err != nil {
+			fmt.Println("error accepting connections ", err)
+			continue
+		}
+		go s.handleConn(conn)
+	}
+
+}
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
+	flag.Parse()
+	// l, err := net.Listen("tcp", "0.0.0.0:6379")
+	// if err != nil {
+	// 	fmt.Println("Failed to bind port 6379")
+	// 	os.Exit(1)
+	// }
 
-	l, err := net.Listen("tcp", "0.0.0.0:6379")
-	if err != nil {
-		fmt.Println("Failed to bind port 6379")
-		os.Exit(1)
-	}
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			fmt.Println("Error accepting connection: ", err.Error())
-			continue
-		}
+	// for {
+	// 	conn, err := l.Accept()
+	// 	if err != nil {
+	// 		fmt.Println("Error accepting connection: ", err.Error())
+	// 		continue
+	// 	}
 		
-		go handleConn(conn)
+	// 	go handleConn(conn)
+	// }
+	server := NewServer()
+
+	if err := server.startServer(fmt.Sprintf("%s:%s", *addr, *port)); err != nil {
+		fmt.Println("error starting the server ", err)
+		os.Exit(1)
 	}
 }
 
-func handleConn(conn net.Conn) {
+func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
-	//reader := bufio.NewReader(conn)
-	
+	reader := bufio.NewReader(conn)
+	// reader receives inputs & is parsed with parseCommand function. This also converts the incoming resp protocal commands to slice of string & returns error if any
 	for {
-		// read incoming message from the connection until newline
-		// _, err := reader.ReadString('\n')
-		// if err != nil {
-		// 	fmt.Println("Error reading from connection ", err)
-		// 	return
-		// }
-		// conn.Write([]byte("+PONG\r\n"))
-
-		// inputCmd := strings.TrimSpace(string(msg))
-		// if inputCmd == "*1\r\n$4\r\nPING\r\n" {
-		// 	fmt.Println("got ping")
-		// } else {
-		// 	fmt.Println("got something else from inputCmd ", string(msg))
-		// }
-		buf := make([]byte, 2048)
-		read, err := conn.Read(buf)
+		inputCmd, err := parseCommand(reader)
+		
 		if err != nil {
-			fmt.Println("Error reading value -> ", err.Error())
-			return
+			if err == io.EOF{
+				fmt.Println("connection is closed")
+			} else {
+				fmt.Println("Invalid command received")
+				conn.Write([]byte("-ERR invalid commands \r\n"))
+			}
+			break
 		}
-		fmt.Println("read data -> ", read)
-		conn.Write([]byte("+PONG\r\n"))
+		fmt.Println("inputCmd -> ", inputCmd, err)
+		response  := executeCommand(s, conn, inputCmd)
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("error in writing response -. ", err)
+			break
+		}
 	}
-
-	
 }
