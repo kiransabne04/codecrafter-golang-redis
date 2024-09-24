@@ -25,7 +25,7 @@ var CommandMap = map[string]func(s *Server, c net.Conn, args []string)string{
 	"SET":  (*Server).SetCommand,
 	"GET":  (*Server).GetCommand,
 	"INFO": (*Server).InfoCommand,
-	
+	"REPLCONF": (*Server).ReplConfCommand,
 }
 
 // *1\r\n$4\r\nPING\r\n
@@ -119,6 +119,13 @@ func (s *Server) PingCommand(c net.Conn, args []string) string {
 	return fmt.Sprintf("+PONG\r\n")
 }
 
+func (s *Server) ReplConfCommand(c net.Conn, args []string) string {
+	if len(args) > 1 {
+		return "-ERR wrng number of 'REPLCONF' arguments\r\n"
+	}
+	return fmt.Sprintf("+OK\r\n")
+}
+
 func (s *Server) EchoCommand(c net.Conn, args []string) string {
 	if len(args) != 1 {
 		return "-ERR wrng number of arguments for 'ECHO' command\r\n"
@@ -199,8 +206,14 @@ func (s *Server)HandShakeCommand() {
 	}
 	defer m.Close()
 	m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
+	time.Sleep(1 * time.Second)
+	m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"))
 	//return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
+	time.Sleep(1 * time.Second)
+	m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"))
 }
+
+
 
 func executeCommand(s *Server, c net.Conn, args []string) string {
 	fmt.Println("execute commands -> ", args, args[0], args[0][0])
