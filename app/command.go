@@ -136,6 +136,15 @@ func (s *Server) SetCommand(c net.Conn, args []string) string {
 		Value: value,
 		CreatedAt: time.Now(),
 	}
+	// check if PX is used for setting expiary of the key. If set then validate it and convert the millis into int and set it for records values
+	if len(args) == 4 && strings.ToUpper(args[3]) == "PX" {
+		expiration, err := strconv.Atoi(args[4])
+		if err != nil {
+			fmt.Println(err)
+			return "-ERR wrong expiration time provided for the record"
+		}
+		record.ExpiresAt = time.Now().Add(time.Duration(expiration) * time.Millisecond)
+	}
 
 	s.DataStore[key] = record
 	return fmt.Sprintf("+OK\r\n")
