@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 )
 
 // inputs for command cli flags
@@ -20,6 +21,7 @@ type Server struct {
 	Role string
 	Listener net.Listener
 	Stats ServerStats
+	DataStore map[string]*Record
 }
 
 // serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
@@ -28,11 +30,18 @@ type ServerStats struct {
 	CommandsProcessed int
 }
 
+type Record struct {
+	Value any
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
 // initializes the new server with default config or opts
 func NewServer() *Server {
 	return &Server{
 		Role: "master",
 		Stats: ServerStats{},
+		DataStore: make(map[string]*Record),
 	}
 }
 

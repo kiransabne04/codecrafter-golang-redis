@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type CommandFunc func(s *Server, c net.Conn, args []string) string
@@ -18,11 +19,11 @@ type CommandFunc func(s *Server, c net.Conn, args []string) string
 // 	ExpiresAt time.Time
 // }
 
-var CommandMap = map[string]CommandFunc{
-	"PING": PingCommand,
-	"ECHO": EchoCommand,
-	// "SET":  SetCommand,
-	// "GET":  GetCommand,
+var CommandMap = map[string]func(s *Server, c net.Conn, args []string)string{
+	"PING": (*Server).PingCommand,
+	"ECHO": (*Server).EchoCommand,
+	"SET":  (*Server).SetCommand,
+	"GET":  (*Server).GetCommand,
 	// "INFO": InfoCommand,
 }
 
@@ -110,19 +111,53 @@ func parseArray(reader *bufio.Reader, line string) ([]string, error){
 	return args, nil
 }
 
-func PingCommand(s *Server, c net.Conn, args []string) string {
+func (s *Server) PingCommand(c net.Conn, args []string) string {
 	if len(args) > 0 {
 		return "-ERR wrong number of argument for 'PING' command\r\n"
 	}
 	return fmt.Sprintf("+PONG\r\n")
 }
 
-func EchoCommand(s *Server, c net.Conn, args []string) string {
+func (s *Server) EchoCommand(c net.Conn, args []string) string {
 	if len(args) != 1 {
 		return "-ERR wrng number of arguments for 'ECHO' command\r\n"
 	}
 	fmt.Println("echo command -> ", args, args[0])
 	return fmt.Sprintf("+%s\r\n", args[0])
+}
+
+func (s *Server) SetCommand(c net.Conn, args []string) string {
+	if len(args) < 2 {
+		return "-ERR wrong number of arguments for 'SET' command\r\n"
+	}
+	key := args[0]
+	value := args[1]
+	record := &Record{
+		Value: value,
+		CreatedAt: time.Now(),
+	}
+
+	s.DataStore[key] = record
+	return fmt.Sprintf("+OK\r\n")
+}
+
+func (s *Server) GetCommand(c net.Conn, args []string) string {
+	if len(args) != 1 {
+		return "-ERR wrong number of arguments for 'GET' command\r\n"
+	}
+	key := args[0]
+	val, prsnt := s.DataStore[key]
+	if !prsnt {
+		return "$-1\r\n"
+	}
+
+	// check for expiary
+	if time.Now().After(val.ExpiresAt) && !val.ExpiresAt.IsZero() {
+		delete(s.DataStore, key)
+		return "$-1\r\n"
+	}
+
+	return fmt.Sprintf("$%d\r\n%s\r\n", len(val.Value.(string)), val.Value)
 }
 
 func executeCommand(s *Server, c net.Conn, args []string) string {
