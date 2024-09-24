@@ -30,6 +30,7 @@ type ServerStats struct {
 	CommandsProcessed int
 }
 
+// record dt
 type Record struct {
 	Value any
 	CreatedAt time.Time
