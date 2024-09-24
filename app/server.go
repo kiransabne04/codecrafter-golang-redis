@@ -39,7 +39,7 @@ func handleConn(conn net.Conn) {
 	
 	for {
 		// read incoming message from the connection until newline
-		msg, err := reader.ReadBytes('\n')
+		msg, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection ", err)
 			return
