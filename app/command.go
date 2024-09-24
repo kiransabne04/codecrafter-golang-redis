@@ -206,10 +206,10 @@ func (s *Server)HandShakeCommand() {
 	}
 	defer m.Close()
 	m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
-	time.Sleep(1 * time.Second)
+	//time.Sleep(1 * time.Second)
 	m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"))
 	//return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
-	time.Sleep(1 * time.Second)
+	//time.Sleep(1 * time.Second)
 	m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"))
 }
 
