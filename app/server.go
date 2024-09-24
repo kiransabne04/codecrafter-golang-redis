@@ -71,7 +71,7 @@ func (s *Server) startServer (addr string) error {
 		fmt.Sprintf("failed to bind port %s \n", addr)
 		return err
 	}
-	
+	fmt.Println("s.Listener")
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
