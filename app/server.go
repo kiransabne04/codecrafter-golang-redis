@@ -56,11 +56,16 @@ func NewServer() *Server {
 	} else {
 		server.Role = "slave"
 	}
+	// if replicaof is provided then take masterHost & masterPort
+	var masterHost, masterPort string
+	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
 
 	server.Stats = ServerStats{}
 	server.DataStore = make(map[string]*Record)
 	server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
 	server.MasterReplOffset = 0
+	server.MasterHost = masterHost
+	server.MasterPort = masterPort
 	return server
 }
 
@@ -110,6 +115,7 @@ func main() {
 		fmt.Println("error starting the server ", err)
 		os.Exit(1)
 	}
+
 }
 
 func (s *Server) handleConn(conn net.Conn) {
@@ -134,6 +140,10 @@ func (s *Server) handleConn(conn net.Conn) {
 		if err != nil {
 			fmt.Println("error in writing response -. ", err)
 			break
+		}
+
+		if s.Role == "slave" {
+			s.HandShakeCommand(conn)
 		}
 	}
 }

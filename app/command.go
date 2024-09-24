@@ -25,6 +25,7 @@ var CommandMap = map[string]func(s *Server, c net.Conn, args []string)string{
 	"SET":  (*Server).SetCommand,
 	"GET":  (*Server).GetCommand,
 	"INFO": (*Server).InfoCommand,
+	
 }
 
 // *1\r\n$4\r\nPING\r\n
@@ -186,6 +187,10 @@ func (s *Server) InfoCommand(c net.Conn, args []string) string {
 	`, s.Role, s.ConnectedSlaves, s.MasterReplid, s.MasterReplOffset, s.ReplBacklogActive, s.ReplBacklogSize, s.ReplBacklogFirstByteOffset, s.ReplBacklogHistlen )
 
 	return fmt.Sprintf("$%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
+}
+
+func (s *Server)HandShakeCommand(c net.Conn) string {
+	return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
 }
 
 func executeCommand(s *Server, c net.Conn, args []string) string {
