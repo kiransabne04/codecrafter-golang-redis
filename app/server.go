@@ -146,6 +146,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 	}
 	if s.Role == "slave" {
+		fmt.Println("slave handshake")
 		s.HandShakeCommand(conn)
 	}
 }
