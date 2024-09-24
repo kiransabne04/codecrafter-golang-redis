@@ -81,9 +81,7 @@ func (s *Server) startServer (addr string) error {
 		fmt.Sprintf("failed to bind port %s \n", addr)
 		return err
 	}
-	if s.Role == "slave" {
-		s.HandShakeCommand()
-	}
+	
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
@@ -146,7 +144,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			fmt.Println("error in writing response -. ", err)
 			break
 		}
-
-		
+	}
+	if s.Role == "slave" {
+		s.HandShakeCommand(conn)
 	}
 }
