@@ -185,7 +185,7 @@ func (s *Server) InfoCommand(c net.Conn, args []string) string {
 	repl_backlog_histlen:%d
 	`, s.Role, s.ConnectedSlaves, s.MasterReplid, s.MasterReplOffset, s.ReplBacklogActive, s.ReplBacklogSize, s.ReplBacklogFirstByteOffset, s.ReplBacklogHistlen )
 
-	return fmt.Sprintf("%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
+	return fmt.Sprintf("$%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
 }
 
 func executeCommand(s *Server, c net.Conn, args []string) string {
