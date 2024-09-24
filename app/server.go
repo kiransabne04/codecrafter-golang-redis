@@ -14,6 +14,7 @@ import (
 var (
 	port = flag.String("port", "6379", "port number to connect on")
 	addr = flag.String("addr", "0.0.0.0", "addressr to connect on") 
+	replicaof = flag.String("replicaof", "", "replica flag for the cli")
 )
 
 // server struct containing server properties & stats
@@ -29,6 +30,8 @@ type Server struct {
 	ReplBacklogSize            int
 	ReplBacklogFirstByteOffset int64
 	ReplBacklogHistlen         int64
+	MasterHost string
+	MasterPort string
 }
 
 // serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
@@ -46,11 +49,18 @@ type Record struct {
 
 // initializes the new server with default config or opts
 func NewServer() *Server {
-	return &Server{
-		Role: "master",
-		Stats: ServerStats{},
-		DataStore: make(map[string]*Record),
+
+	server := &Server{}
+	if *replicaof == "" {
+		server.Role = "master"
+	} else {
+		server.Role = "slave"
 	}
+
+	server.Stats = ServerStats{}
+	server.DataStore = make(map[string]*Record)
+	
+	return server
 }
 
 // start server function starts the server and listens to tge mentioned port
