@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
@@ -39,18 +38,19 @@ func handleConn(conn net.Conn) {
 	
 	for {
 		// read incoming message from the connection until newline
-		msg, err := reader.ReadString('\n')
+		_, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection ", err)
 			return
 		}
+		conn.Write([]byte("+PONG\r\n"))
 
-		inputCmd := strings.TrimSpace(string(msg))
-		if inputCmd == "*1\r\n$4\r\nPING\r\n" {
-			fmt.Println("got ping")
-		} else {
-			fmt.Println("got something else from inputCmd ", string(msg))
-		}
+		// inputCmd := strings.TrimSpace(string(msg))
+		// if inputCmd == "*1\r\n$4\r\nPING\r\n" {
+		// 	fmt.Println("got ping")
+		// } else {
+		// 	fmt.Println("got something else from inputCmd ", string(msg))
+		// }
 	}
 
 	
