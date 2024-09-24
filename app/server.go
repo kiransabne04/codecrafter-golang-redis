@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
@@ -35,9 +36,21 @@ func main() {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
+	
 	for {
-		fmt.Println("reader -> ", reader)
-		conn.Write([]byte("+PONG\r\n"))
+		// read incoming message from the connection until newline
+		msg, err := reader.ReadBytes('\n')
+		if err != nil {
+			fmt.Println("Error reading from connection ", err)
+			return
+		}
+
+		inputCmd := strings.TrimSpace(string(msg))
+		if inputCmd == "*1\r\n$4\r\nPING\r\n" {
+			fmt.Println("got ping")
+		} else {
+			fmt.Println("got something else from inputCmd ", string(msg))
+		}
 	}
 
 	
