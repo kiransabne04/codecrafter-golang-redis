@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -34,16 +33,16 @@ func main() {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	reader := bufio.NewReader(conn)
+	//reader := bufio.NewReader(conn)
 	
 	for {
 		// read incoming message from the connection until newline
-		_, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error reading from connection ", err)
-			return
-		}
-		conn.Write([]byte("+PONG\r\n"))
+		// _, err := reader.ReadString('\n')
+		// if err != nil {
+		// 	fmt.Println("Error reading from connection ", err)
+		// 	return
+		// }
+		// conn.Write([]byte("+PONG\r\n"))
 
 		// inputCmd := strings.TrimSpace(string(msg))
 		// if inputCmd == "*1\r\n$4\r\nPING\r\n" {
@@ -51,6 +50,14 @@ func handleConn(conn net.Conn) {
 		// } else {
 		// 	fmt.Println("got something else from inputCmd ", string(msg))
 		// }
+		buf := make([]byte, 2048)
+		read, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println("Error reading value -> ", err.Error())
+			return
+		}
+		fmt.Println("read data -> ", read)
+		conn.Write([]byte("+PONG\r\n"))
 	}
 
 	
