@@ -24,7 +24,7 @@ var CommandMap = map[string]func(s *Server, c net.Conn, args []string)string{
 	"ECHO": (*Server).EchoCommand,
 	"SET":  (*Server).SetCommand,
 	"GET":  (*Server).GetCommand,
-	// "INFO": InfoCommand,
+	"INFO": (*Server).InfoCommand,
 }
 
 // *1\r\n$4\r\nPING\r\n
@@ -167,6 +167,25 @@ func (s *Server) GetCommand(c net.Conn, args []string) string {
 	}
 
 	return fmt.Sprintf("$%d\r\n%s\r\n", len(val.Value.(string)), val.Value)
+}
+
+func (s *Server) InfoCommand(c net.Conn, args []string) string {
+	if len(args) != 1 && strings.ToLower(args[1]) != "replication" {
+		return "-ERR wrong number of arguments for 'INFO' command"
+	}
+	replicationInfo := fmt.Sprintf(`# Replication
+	role:%s
+	connected_slaves:%d
+	master_replid:%s
+	master_repl_offset:%d
+	second_repl_offset:-1
+	repl_backlog_active:%d
+	repl_backlog_size:%d
+	repl_backlog_first_byte_offset:%d
+	repl_backlog_histlen:%d
+	`, s.Role, s.ConnectedSlaves, s.MasterReplid, s.MasterReplOffset, s.ReplBacklogActive, s.ReplBacklogSize, s.ReplBacklogFirstByteOffset, s.ReplBacklogHistlen )
+
+	return fmt.Sprintf("%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
 }
 
 func executeCommand(s *Server, c net.Conn, args []string) string {

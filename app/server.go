@@ -22,6 +22,13 @@ type Server struct {
 	Listener net.Listener
 	Stats ServerStats
 	DataStore map[string]*Record
+	ConnectedSlaves            int
+	MasterReplid               string
+	MasterReplOffset           int64
+	ReplBacklogActive          int
+	ReplBacklogSize            int
+	ReplBacklogFirstByteOffset int64
+	ReplBacklogHistlen         int64
 }
 
 // serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
