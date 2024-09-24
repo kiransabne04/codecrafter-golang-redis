@@ -71,7 +71,9 @@ func (s *Server) startServer (addr string) error {
 		fmt.Sprintf("failed to bind port %s \n", addr)
 		return err
 	}
-	fmt.Println("s.Listener")
+	fmt.Sprintf("s.Listener %s\n", addr)
+
+
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
@@ -116,16 +118,12 @@ func main() {
 		server.Role = "slave"
 		server.MasterHost = masterHost
 		server.MasterPort = masterPort
-		
+		server.HandShakeCommand()
 	}
 
 	if err := server.startServer(fmt.Sprintf("%s:%s", *addr, *port)); err != nil {
 		fmt.Println("error starting the server ", err)
 		os.Exit(1)
-	}
-
-	if server.Role == "slave" {
-		server.HandShakeCommand()
 	}
 
 }
@@ -155,5 +153,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 	}
 	
+
+
 	
 }

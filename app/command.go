@@ -191,11 +191,13 @@ func (s *Server) InfoCommand(c net.Conn, args []string) string {
 
 func (s *Server)HandShakeCommand() {
 	fmt.Println(" HandShakeCommand called")
+	
 	address := fmt.Sprintf("%s:%s", s.MasterHost, s.MasterPort)
 	m, err := net.Dial("tcp", address)
 	if err != nil {
 		fmt.Println("-ERR couldnt connect to master at "+ address )
 	}
+	defer m.Close()
 	m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
 	//return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
 }
