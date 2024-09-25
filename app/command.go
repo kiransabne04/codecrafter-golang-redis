@@ -221,7 +221,7 @@ func (s *Server)HandShakeCommand() {
 		return
 	}
 	fmt.Println("received from master ->",strings.TrimSpace(string(response)))
-	
+	fmt.Println(strings.TrimSpace(string(response)) == "+PONG")
 	//check if response is PONG
 	if strings.TrimSpace(string(response)) != "+PONG" {
 		fmt.Println("-ERR invalid response from master")
