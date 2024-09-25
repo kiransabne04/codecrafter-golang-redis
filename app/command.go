@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -12,7 +13,7 @@ import (
 )
 
 type CommandFunc func(s *Server, c net.Conn, args []string) string
-
+const emptyHexStr = "524544495330303131fa0972656469732d76657205372e322e30fa0a72656469732d62697473c040fa056374696d65c26d08bc65fa08757365642d6d656dc2b0c41000fa08616f662d62617365c000fff06e3bfec0ff5aa2"
 // type Record struct {
 // 	Value     any
 // 	CreatedAt time.Time
@@ -135,8 +136,28 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	if len(args) > 2 {
 		return "-ERR wrong number of 'PSYNC' arguments\r\n"
 	}
-	return fmt.Sprintf("+FULLRESYNC %s 0\r\n", s.MasterReplid)
+	//return fmt.Sprintf("+FULLRESYNC %s 0\r\n", s.MasterReplid)
+	// reposne with FullRESYNC command & then later with rdb file
+	fullResyncResponse := fmt.Sprintf("+FULLRESYNC %s 0\r\n", s.MasterReplid)
+	_, err := c.Write([]byte(fullResyncResponse))
+	if err != nil {
+		fmt.Println("error sending resync response")
+		return "-ERR error"
+	}
+
+	// asending file to server
+	var emptyRDB, _ = hex.DecodeString(emptyHexStr)
+	_, err = c.Write(append([]byte(fmt.Sprintf("$%d\r\n", len(emptyRDB))), emptyRDB...))
+	if err != nil {
+		fmt.Println("error sending rdb file")
+		return "-ERR error sending rdb file"
+	}
+
+	return ""
+	//return s.fullSync(c)
 }
+
+
 
 func (s *Server) EchoCommand(c net.Conn, args []string) string {
 	if len(args) != 1 {
