@@ -142,7 +142,7 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	_, err := c.Write([]byte(fullResyncResponse))
 	if err != nil {
 		fmt.Println("error sending resync response")
-		return "-ERR error"
+		return "-ERR error sending resync response"
 	}
 
 	// asending file to server
