@@ -277,7 +277,7 @@ func (s *Server) propagateCommandToReplica(command string, args []string) {
 	}
 	fmt.Println("cmd -> ", cmd, args)
 	//send the comand to replica
-	_, err := s.ConnectedReplica.Write([]byte("cmd"))
+	_, err := s.ConnectedReplica.Write([]byte(cmd))
 	if err != nil {
 		fmt.Println("Error sending command to replica")
 		return
