@@ -82,6 +82,7 @@ func (s *Server) startServer (host, port, replicaof string) error {
 		s.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
 		s.MasterReplOffset = 0
 		fmt.Printf("Server is running as master on %s:%s\n", host, port)
+		s.HandShakeCommand()
 	} else {
 		var masterHost, masterPort string
 		fmt.Sscanf(replicaof, "%s %s", &masterHost, &masterPort)
