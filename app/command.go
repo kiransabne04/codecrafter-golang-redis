@@ -220,13 +220,13 @@ func (s *Server)HandShakeCommand() {
 		fmt.Println("-ERR reading PONG response from master failed", err)
 		return
 	}
-	fmt.Println("received from master -> ", string(response))
-
+	fmt.Println("received from master -> ",strings.TrimSpace(string(response)))
+	
 	//check if response is PONG
-	// if string(response[:6]) != "+PONG\r\n" {
-	// 	fmt.Println("-ERR invalid response from master")
-	// 	return
-	// }
+	if strings.TrimSpace(string(response)) != "+PONG\r\n" {
+		fmt.Println("-ERR invalid response from master")
+		return
+	}
 
 	//send Replconf listening port to master
 	_, err = m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"))
