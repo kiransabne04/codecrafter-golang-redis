@@ -156,6 +156,7 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	// After sending the RDB, the master should wait for further commands or propagate writes
 	fmt.Println("RDB file sent successfully")
 
+	s.ConnectedReplica = c
 	return ""
 	//return s.fullSync(c)
 }
