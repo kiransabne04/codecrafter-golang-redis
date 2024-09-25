@@ -137,6 +137,8 @@ func main() {
 func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
+	line, _ := reader.Peek(4)
+	fmt.Println("line ->:",string(line))
 	// reader receives inputs & is parsed with parseCommand function. This also converts the incoming resp protocal commands to slice of string & returns error if any
 	for {
 		inputCmd, err := parseCommand(reader)
