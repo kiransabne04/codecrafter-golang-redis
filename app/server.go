@@ -100,21 +100,21 @@ func (s *Server) startServer (host, port, replicaof string) error {
 			fmt.Println("error accepting connections ", err)
 			continue
 		}
-		//go s.handleConn(conn)
-		go func (c net.Conn)  {
-			reader := bufio.NewReader(c)
-			line, _ := reader.Peek(4) // peek at first few bytes of the connection
+		go s.handleConn(conn)
+		// go func (c net.Conn)  {
+		// 	reader := bufio.NewReader(c)
+		// 	line, _ := reader.Peek(4) // peek at first few bytes of the connection
 
-			// If the connection is from a replica (expecting PSYNC), start the handshake
-			if string(line) == "PSYN" {
-				fmt.Println("Replica connection detected, starting handshake.")
-				s.HandShakeCommand(c)
-			} else {
-				// Otherwise, assume it's a client connection
-				fmt.Println("Client connection detected, processing commands.")
-				go s.handleConn(c)
-			}
-		}(conn)
+		// 	// If the connection is from a replica (expecting PSYNC), start the handshake
+		// 	if string(line) == "PSYN" {
+		// 		fmt.Println("Replica connection detected, starting handshake.")
+		// 		s.HandShakeCommand(c)
+		// 	} else {
+		// 		// Otherwise, assume it's a client connection
+		// 		fmt.Println("Client connection detected, processing commands.")
+		// 		s.handleConn(c)
+		// 	}
+		// }(conn)
 		
 	}
 
