@@ -82,7 +82,7 @@ func (s *Server) startServer (host, port, replicaof string) error {
 		s.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
 		s.MasterReplOffset = 0
 		fmt.Printf("Server is running as master on %s:%s\n", host, port)
-		s.HandShakeCommand()
+		//s.HandShakeCommand()
 	} else {
 		var masterHost, masterPort string
 		fmt.Sscanf(replicaof, "%s %s", &masterHost, &masterPort)
@@ -90,7 +90,7 @@ func (s *Server) startServer (host, port, replicaof string) error {
 		s.MasterHost = masterHost
 		s.MasterPort = masterPort
 		fmt.Printf("Server running as slave connecting to master at %s:%s\n", masterHost, masterPort)
-		s.HandShakeCommand()
+		//s.HandShakeCommand()
 	}
 	
 
@@ -100,7 +100,21 @@ func (s *Server) startServer (host, port, replicaof string) error {
 			fmt.Println("error accepting connections ", err)
 			continue
 		}
-		go s.handleConn(conn)
+		//go s.handleConn(conn)
+		go func (c net.Conn)  {
+			reader := bufio.NewReader(c)
+			line, _ := reader.Peek(4) // peek at first few bytes of the connection
+
+			// If the connection is from a replica (expecting PSYNC), start the handshake
+			if string(line) == "PSYN" {
+				fmt.Println("Replica connection detected, starting handshake.")
+				s.HandShakeCommand(c)
+			} else {
+				// Otherwise, assume it's a client connection
+				fmt.Println("Client connection detected, processing commands.")
+				s.handleConn(c)
+			}
+		}(conn)
 		
 	}
 
