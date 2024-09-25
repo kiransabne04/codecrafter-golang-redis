@@ -220,7 +220,7 @@ func (s *Server)HandShakeCommand() {
 		fmt.Println("-ERR reading PONG response from master failed", err)
 		return
 	}
-	fmt.Println("received from master -> ",strings.TrimSpace(string(response)))
+	fmt.Println("received from master ->",strings.TrimSpace(string(response)))
 	
 	//check if response is PONG
 	if strings.TrimSpace(string(response)) != "+PONG\r\n" {
