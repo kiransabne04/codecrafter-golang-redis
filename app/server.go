@@ -63,11 +63,11 @@ func NewServer() *Server {
 }
 
 // start server function starts the server and listens to tge mentioned port
-func (s *Server) startServer (host, port string, replica string) error {
+func (s *Server) startServer (host, port, replicaof string) error {
 	var err error
 	fmt.Println("Server is starting to initialize")
 
-	s.Listener, err = net.Listen("tcp", host)
+	s.Listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
 		fmt.Sprintf("failed to bind port %s \n", addr)
 		return err
@@ -75,7 +75,7 @@ func (s *Server) startServer (host, port string, replica string) error {
 	fmt.Sprintf("s.Listener %s\n", addr)
 
 	// if replicaof is empty, we are starting as master else slave
-	if *replicaof == "" {
+	if replicaof == "" {
 		s.Role = "master"
 		s.MasterHost = host
 		s.MasterPort = port
@@ -84,7 +84,7 @@ func (s *Server) startServer (host, port string, replica string) error {
 		fmt.Printf("Server is running as master on %s:%s\n", host, port)
 	} else {
 		var masterHost, masterPort string
-		fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
+		fmt.Sscanf(replicaof, "%s %s", &masterHost, &masterPort)
 		s.Role = "slave"
 		s.MasterHost = masterHost
 		s.MasterPort = masterPort
@@ -143,8 +143,5 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 	}
-	
 
-
-	
 }
