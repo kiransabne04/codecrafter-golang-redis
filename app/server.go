@@ -57,37 +57,41 @@ func NewServer() *Server {
 
 	server.Stats = ServerStats{}
 	server.DataStore = make(map[string]*Record)
-	server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
-	server.MasterReplOffset = 0
+	// server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+	// server.MasterReplOffset = 0
 	return server
 }
 
 // start server function starts the server and listens to tge mentioned port
-func (s *Server) startServer (addr string) error {
+func (s *Server) startServer (host, port string, replica string) error {
 	var err error
 	fmt.Println("Server is starting to initialize")
 
-	s.Listener, err = net.Listen("tcp", addr)
+	s.Listener, err = net.Listen("tcp", host)
 	if err != nil {
 		fmt.Sprintf("failed to bind port %s \n", addr)
 		return err
 	}
 	fmt.Sprintf("s.Listener %s\n", addr)
 
-	var masterHost, masterPort string
-	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
-
+	// if replicaof is empty, we are starting as master else slave
 	if *replicaof == "" {
 		s.Role = "master"
-		s.MasterHost = addr
-		s.MasterPort = *port
+		s.MasterHost = host
+		s.MasterPort = port
+		s.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+		s.MasterReplOffset = 0
+		fmt.Printf("Server is running as master on %s:%s\n", host, port)
 	} else {
-		fmt.Println("slave server -> ", masterHost, masterPort)
+		var masterHost, masterPort string
+		fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
 		s.Role = "slave"
 		s.MasterHost = masterHost
 		s.MasterPort = masterPort
+		fmt.Printf("Server running as slave connecting to master at %s:%s\n", masterHost, masterPort)
 		s.HandShakeCommand()
 	}
+	
 
 	for {
 		conn, err := s.Listener.Accept()
@@ -105,27 +109,11 @@ func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 	flag.Parse()
-	// l, err := net.Listen("tcp", "0.0.0.0:6379")
-	// if err != nil {
-	// 	fmt.Println("Failed to bind port 6379")
-	// 	os.Exit(1)
-	// }
-
-	// for {
-	// 	conn, err := l.Accept()
-	// 	if err != nil {
-	// 		fmt.Println("Error accepting connection: ", err.Error())
-	// 		continue
-	// 	}
-		
-	// 	go handleConn(conn)
-	// }
 	server := NewServer()
 
-	
-
-	if err := server.startServer(fmt.Sprintf("%s:%s", *addr, *port)); err != nil {
-		fmt.Println("error starting the server ", err)
+	err := server.startServer(*addr, *port, *replicaof)
+	if err != nil {
+		fmt.Printf("Failed to start the server: %v\n", err)
 		os.Exit(1)
 	}
 
