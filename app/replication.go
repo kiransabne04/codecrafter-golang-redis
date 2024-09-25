@@ -16,7 +16,7 @@ func (s *Server)HandShakeCommand() {
 		fmt.Println("-ERR couldnt connect to master at "+ address )
 	}
 
-	defer m.Close()
+	//defer m.Close()
 	// sned PING to the master
 	
 	_, err = m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
@@ -90,8 +90,9 @@ func (s *Server)HandShakeCommand() {
 		return
 	}
 	s.ConnectedReplica = m
-	fmt.Println("s.ConnectedReplica -> ", m)
+	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
 	fmt.Println("recevied PSYNC response :", string(response))
+
 }
 
 
