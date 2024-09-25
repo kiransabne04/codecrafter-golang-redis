@@ -90,7 +90,7 @@ func (s *Server)HandShakeCommand() {
 		return
 	}
 	s.ConnectedReplica = m
-	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica, s.Listener)
+	fmt.Println("s.ConnectedReplica -> ", m)
 	fmt.Println("recevied PSYNC response :", string(response), s.ConnectedReplica)
 }
 
