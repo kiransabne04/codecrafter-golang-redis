@@ -9,17 +9,18 @@ import (
 func (s *Server)HandShakeCommand(c net.Conn) {
 	fmt.Println(" HandShakeCommand called")
 
-	address := fmt.Sprintf("%s:%s", s.MasterHost, s.MasterPort)
-	m, err := net.Dial("tcp", address) // connecting to the master
-	if err != nil {
-		fmt.Println("-ERR couldnt connect to master at "+ address )
-	}
+	// address := fmt.Sprintf("%s:%s", s.MasterHost, s.MasterPort)
+	// m, err := net.Dial("tcp", address) // connecting to the master
+	// if err != nil {
+	// 	fmt.Println("-ERR couldnt connect to master at "+ address )
+	// }
+	m := c
 	s.ConnectedReplica = m
 	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
 	//defer m.Close()
 	// sned PING to the master
 
-	_, err = m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
+	_, err := m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
 	if err != nil {
 		fmt.Println("-ERR sending ping to master server failed")
 		return
