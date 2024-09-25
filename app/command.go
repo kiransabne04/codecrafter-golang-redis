@@ -131,7 +131,7 @@ func (s *Server) ReplConfCommand(c net.Conn, args []string) string {
 
 // reponse for PSYNC command received from slave to master
 func (s *Server)FullResyncCommand(c net.Conn, args[] string) string {
-	fmt.Println("full resync command received:", args)
+	fmt.Println("full resync command received:", len(args))
 	if len(args) > 0 {
 		return "-ERR wrong number of 'PSYNC' arguments\r\n"
 	}
