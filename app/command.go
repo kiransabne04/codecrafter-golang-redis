@@ -134,7 +134,7 @@ func (s *Server)FullResyncCommand(c net.Conn, args[] string) string {
 	if len(args) > 1 {
 		return "-ERR wrong number of 'PSYNC' arguments\r\n"
 	}
-	return fmt.Sprintf("+FULLRESYNC <REPL_ID> 0\r\n")
+	return fmt.Sprintf("+FULLRESYNC %s 0\r\n", s.MasterReplid)
 }
 
 func (s *Server) EchoCommand(c net.Conn, args []string) string {
