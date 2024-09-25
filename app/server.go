@@ -112,7 +112,7 @@ func (s *Server) startServer (host, port, replicaof string) error {
 			} else {
 				// Otherwise, assume it's a client connection
 				fmt.Println("Client connection detected, processing commands.")
-				s.handleConn(c)
+				go s.handleConn(c)
 			}
 		}(conn)
 		
