@@ -89,8 +89,7 @@ func (s *Server)HandShakeCommand() {
 		fmt.Println("-ERR reading PSYNC response :", err)
 		return
 	}
-	s.ConnectedReplica = m
-	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
+	
 	fmt.Println("recevied PSYNC response :", string(response))
 
 }
