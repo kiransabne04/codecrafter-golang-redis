@@ -119,6 +119,7 @@ func (s *Server) PingCommand(c net.Conn, args []string) string {
 	if len(args) > 0 {
 		return "-ERR wrong number of argument for 'PING' command\r\n"
 	}
+	
 	return fmt.Sprintf("+PONG\r\n")
 }
 
