@@ -107,13 +107,24 @@ func (s *Server) HandShakeCommand(conn net.Conn) {
 		case strings.HasPrefix(line, "PSYNC"):
 			replicationID := "replid-12345"
 			conn.Write([]byte(fmt.Sprintf("+FULLRESYNC %s 0\r\n", replicationID)))
-			//s.sendRDB(conn)
+			s.sendRDB(conn)
 
 			// Set the connection for future command propagation
 			s.ConnectedReplica = conn
 			return // Exit the handshake and continue for command propagation
 		}
 	}
+}
+
+func (s *Server) sendRDB(conn net.Conn) {
+	// Send a mock RDB file to the replica
+	rdbData := "MOCK_RDB_DATA" // This is just a mock string. Replace it with actual RDB file data.
+	_, err := conn.Write([]byte(fmt.Sprintf("$%d\r\n%s\r\n", len(rdbData), rdbData)))
+	if err != nil {
+		fmt.Println("-ERR sending RDB to replica failed:", err)
+		return
+	}
+	fmt.Println("Sent RDB file to replica.")
 }
 
 
