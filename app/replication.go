@@ -15,7 +15,8 @@ func (s *Server)HandShakeCommand() {
 	if err != nil {
 		fmt.Println("-ERR couldnt connect to master at "+ address )
 	}
-
+	s.ConnectedReplica = m
+	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
 	//defer m.Close()
 	// sned PING to the master
 	
@@ -34,11 +35,6 @@ func (s *Server)HandShakeCommand() {
 	}
 	fmt.Println("received from master ->",strings.TrimSpace(string(response)))
 	fmt.Println(strings.TrimSpace(string(response)))
-	// //check if response is PONG
-	// if strings.TrimSpace(string(response)) != " +PONG" {
-	// 	fmt.Println("-ERR invalid response from master")
-	// 	return
-	// }
 
 	//send Replconf listening port to master
 	_, err = m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"))
@@ -69,13 +65,6 @@ func (s *Server)HandShakeCommand() {
 		return
 	}
 	fmt.Println("Received REPLCONF (capa psync2) response ", string(response))
-
-	// //time.Sleep(1 * time.Second)
-	// m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"))
-	// //return fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", 1, 4, "PING")
-	// //time.Sleep(1 * time.Second)
-	// m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"))
-
 	// send PSYNC ? -1 command to master
 	_, err = m.Write([]byte("*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"))
 	if err != nil {
