@@ -82,6 +82,7 @@ func (s *Server) startServer (addr string) error {
 		s.MasterHost = addr
 		s.MasterPort = *port
 	} else {
+		fmt.Println("slave server -> ", masterHost, masterPort)
 		s.Role = "slave"
 		s.MasterHost = masterHost
 		s.MasterPort = masterPort
