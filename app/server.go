@@ -153,6 +153,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			break
 		}
 		fmt.Println("inputCmd -> ", inputCmd, err)
+		// csacascas
+		fmt.Println(inputCmd[0] == "PSYNC")
 		response  := executeCommand(s, conn, inputCmd)
 		_, err = conn.Write([]byte(response))
 		if err != nil {
