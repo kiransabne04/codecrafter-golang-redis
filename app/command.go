@@ -120,7 +120,7 @@ func (s *Server) PingCommand(c net.Conn, args []string) string {
 }
 
 func (s *Server) ReplConfCommand(c net.Conn, args []string) string {
-	if len(args) > 1 {
+	if len(args) == 1 {
 		return "-ERR wrng number of 'REPLCONF' arguments\r\n"
 	}
 	return fmt.Sprintf("+OK\r\n")
