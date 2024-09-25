@@ -74,6 +74,20 @@ func (s *Server) startServer (addr string) error {
 	}
 	fmt.Sprintf("s.Listener %s\n", addr)
 
+	var masterHost, masterPort string
+	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
+
+	if *replicaof == "" {
+		s.Role = "master"
+		s.MasterHost = addr
+		s.MasterPort = *port
+	} else {
+		s.Role = "slave"
+		s.MasterHost = masterHost
+		s.MasterPort = masterPort
+		s.HandShakeCommand()
+	}
+
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
@@ -107,19 +121,7 @@ func main() {
 	// }
 	server := NewServer()
 
-	var masterHost, masterPort string
-	fmt.Sscanf(*replicaof, "%s %s", &masterHost, &masterPort)
-
-	if *replicaof == "" {
-		server.Role = "master"
-		server.MasterHost = *addr
-		server.MasterPort = *port
-	} else {
-		server.Role = "slave"
-		server.MasterHost = masterHost
-		server.MasterPort = masterPort
-		server.HandShakeCommand()
-	}
+	
 
 	if err := server.startServer(fmt.Sprintf("%s:%s", *addr, *port)); err != nil {
 		fmt.Println("error starting the server ", err)
