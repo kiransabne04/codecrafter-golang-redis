@@ -158,7 +158,6 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 }
 
 
-
 func (s *Server) EchoCommand(c net.Conn, args []string) string {
 	if len(args) != 1 {
 		return "-ERR wrng number of arguments for 'ECHO' command\r\n"
@@ -188,6 +187,10 @@ func (s *Server) SetCommand(c net.Conn, args []string) string {
 	}
 
 	s.DataStore[key] = record
+
+	if s.ConnectedReplica != nil {
+		s.propagateCommandToReplica("SET", args)
+	}
 	return fmt.Sprintf("+OK\r\n")
 }
 
@@ -266,5 +269,18 @@ func executeCommand(s *Server, c net.Conn, args []string) string {
 	}
 }
 
-
+func (s *Server) propagateCommandToReplica(command string, args []string) {
+	cmd := fmt.Sprintf("*%d\r\n$%d\r\n%s\r\n", len(args) + 1, len(command), command)
+	for _, arg := range args {
+		cmd += fmt.Sprintf("$%d\r\n%s\r\n", len(arg), arg)
+	}
+	fmt.Println("cmd -> ", cmd, args)
+	//send the comand to replica
+	_, err := s.ConnectedReplica.Write([]byte("cmd"))
+	if err != nil {
+		fmt.Println("Error sending command to replica")
+		return
+	}
+	fmt.Printf("Propagated command to replica %s %v\n", command, args)
+}
 

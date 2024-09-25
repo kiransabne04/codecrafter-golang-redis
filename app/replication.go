@@ -11,12 +11,15 @@ func (s *Server)HandShakeCommand() {
 	fmt.Println(" HandShakeCommand called")
 	
 	address := fmt.Sprintf("%s:%s", s.MasterHost, s.MasterPort)
-	m, err := net.Dial("tcp", address)
+	m, err := net.Dial("tcp", address) // connecting to the master
 	if err != nil {
 		fmt.Println("-ERR couldnt connect to master at "+ address )
 	}
+
 	defer m.Close()
 	// sned PING to the master
+	s.ConnectedReplica = m
+	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica, s.Listener)
 	_, err = m.Write([]byte("*1\r\n$4\r\nPING\r\n"))
 	if err != nil {
 		fmt.Println("-ERR sending ping to master server failed")
@@ -88,7 +91,7 @@ func (s *Server)HandShakeCommand() {
 		return
 	}
 	fmt.Println("recevied PSYNC response :", string(response))
-
-	
 }
+
+
 

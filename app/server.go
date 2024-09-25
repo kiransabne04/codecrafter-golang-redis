@@ -32,6 +32,7 @@ type Server struct {
 	ReplBacklogHistlen         int64
 	MasterHost string
 	MasterPort string
+	ConnectedReplica	net.Conn
 }
 
 // serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
@@ -72,7 +73,6 @@ func (s *Server) startServer (addr string) error {
 		return err
 	}
 	fmt.Sprintf("s.Listener %s\n", addr)
-
 
 	for {
 		conn, err := s.Listener.Accept()
