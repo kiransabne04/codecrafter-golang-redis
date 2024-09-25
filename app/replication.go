@@ -74,5 +74,20 @@ func (s *Server)HandShakeCommand() {
 	// //time.Sleep(1 * time.Second)
 	// m.Write([]byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"))
 
+	// send PSYNC ? -1 command to master
+	_, err = m.Write([]byte("*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"))
+	if err != nil {
+		fmt.Println("-ERR sending PSYNC failed :", err)
+		return
+	}
+
+	// read PSYNC ? -1 response
+	_, err = m.Read(response)
+	if err != nil {
+		fmt.Println("-ERR reading PSYNC response :", err)
+		return
+	}
+	fmt.Println("recevied PSYNC response :", string(response))
+
 }
 
