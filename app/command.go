@@ -27,6 +27,7 @@ var CommandMap = map[string]func(s *Server, c net.Conn, args []string)string{
 	"INFO": (*Server).InfoCommand,
 	"REPLCONF": (*Server).ReplConfCommand,
 	"FULLRESYNC": (*Server).FullResyncCommand,
+	"PSYNC": (*Server).FullResyncCommand,
 }
 
 // *1\r\n$4\r\nPING\r\n
@@ -131,9 +132,9 @@ func (s *Server) ReplConfCommand(c net.Conn, args []string) string {
 // reponse for PSYNC command received from slave to master
 func (s *Server)FullResyncCommand(c net.Conn, args[] string) string {
 	fmt.Println("full resync command received:", args)
-	// if len(args) > 0 {
-	// 	return "-ERR wrong number of 'PSYNC' arguments\r\n"
-	// }
+	if len(args) > 0 {
+		return "-ERR wrong number of 'PSYNC' arguments\r\n"
+	}
 	return fmt.Sprintf("+FULLRESYNC %s 0\r\n", s.MasterReplid)
 }
 
