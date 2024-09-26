@@ -102,11 +102,11 @@ func (s *Server) replicateMainLoop(conn net.Conn) {
 		}
 		fmt.Println("replicating main loop:", inputCmd)
 		//execute the command silently without responding
-		executeReplicatedCommand(s, conn, inputCmd)
+		executeReplicatedCommand(s, inputCmd)
 	}
 }
 
-func executeReplicatedCommand(s *Server, c net.Conn, args []string) {
+func executeReplicatedCommand(s *Server, args []string) {
 	fmt.Println("execute replicated command")
 	if len(args) == 0 {
 		fmt.Println("no command received")
@@ -119,9 +119,9 @@ func executeReplicatedCommand(s *Server, c net.Conn, args []string) {
 	switch command {
 	case "SET":
 		// Process the SET command locally
-        response := s.SetCommand(c, args)
+        response := s.SetCommand(nil, args[1:])
 		fmt.Println("replicating set command ->::::", response)
-		s.propagateCommandToReplica(command, args)
+		//s.propagateCommandToReplica(command, args)
 	case "DEL":
 		fmt.Println("replicating del command")
 
