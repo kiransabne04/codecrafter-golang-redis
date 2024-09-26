@@ -83,7 +83,7 @@ func (s *Server)HandShakeCommand() () {
 
 	fmt.Println("recevied PSYNC response :", strings.TrimSpace(string(response)))
 
-	s.replicateMainLoop(m)
+	//s.replicateMainLoop(m)
 	//return &m, nil
 }
 
