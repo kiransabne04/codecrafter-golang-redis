@@ -117,7 +117,7 @@ func executeReplicatedCommand(s *Server, args []string) {
 	switch command {
 	case "SET":
 		fmt.Println("replicating set command")
-
+		s.propagateCommandToReplica(command, args)
 	case "DEL":
 		fmt.Println("replicating del command")
 
