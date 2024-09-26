@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"strings"
@@ -81,7 +82,47 @@ func (s *Server)HandShakeCommand() () {
 	}
 
 	fmt.Println("recevied PSYNC response :", strings.TrimSpace(string(response)))
+
+	s.replicateMainLoop(m)
 	//return &m, nil
+}
+
+func (s *Server) replicateMainLoop(conn net.Conn) {
+	reader := bufio.NewReader(conn)
+
+	for {
+		// parse incoming command from the master
+		inputCmd, err := parseCommand(reader)
+		if err != nil {
+			fmt.Println("error reading command from master:", err)
+			break
+		}
+		fmt.Println("replicating main loop:", inputCmd)
+		//execute the command silently without responding
+		executeReplicatedCommand(s, inputCmd)
+	}
+}
+
+func executeReplicatedCommand(s *Server, args []string) {
+	fmt.Println("execute replicated command")
+	if len(args) == 0 {
+		fmt.Println("no command received")
+		return
+	}
+
+	command := strings.ToUpper(args[0])
+	fmt.Println("processing replicated command:", command, args)
+
+	switch command {
+	case "SET":
+		fmt.Println("replicating set command")
+
+	case "DEL":
+		fmt.Println("replicating del command")
+
+	default:
+		fmt.Println("unknown command from master:", command)
+	}
 }
 
 // func (s *Server) HandShakeCommand(conn net.Conn) {

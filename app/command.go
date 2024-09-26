@@ -156,14 +156,13 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	// After sending the RDB, the master should wait for further commands or propagate writes
 	fmt.Println("RDB file sent successfully")
 
-	s.ConnectedReplica = c
+	//s.ConnectedReplica = c
 	s.Replica[c] = true
 	
 	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica.RemoteAddr(), s.ConnectedReplica.LocalAddr(), s.Replica)
 	return ""
 	//return s.fullSync(c)
 }
-
 
 func (s *Server) EchoCommand(c net.Conn, args []string) string {
 	if len(args) != 1 {
@@ -240,7 +239,6 @@ func (s *Server) InfoCommand(c net.Conn, args []string) string {
 	return fmt.Sprintf("$%d\r\n%s\r\n", len(replicationInfo), replicationInfo)
 }
 
-
 func executeCommand(s *Server, c net.Conn, args []string) string {
 	fmt.Println("execute commands -> ", args, args[0], args[0][0])
 	if len(args) == 0 {
@@ -283,12 +281,6 @@ func (s *Server) propagateCommandToReplica(command string, args []string) {
 		cmd += fmt.Sprintf("$%d\r\n%s\r\n", len(arg), arg)
 	}
 	fmt.Println("cmd -> ", cmd, args)
-	//send the comand to replica
-	// _, err := s.ConnectedReplica.Write([]byte(cmd))
-	// if err != nil {
-	// 	fmt.Println("Error sending command to replica")
-	// 	return
-	// }
 
 	//propagate commands to all connected replicas
 	for replica := range s.Replica{
