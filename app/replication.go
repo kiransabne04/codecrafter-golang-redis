@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -89,23 +90,90 @@ func (s *Server)HandShakeCommand() () {
 	//return &m, nil
 }
 
+// func (s *Server) replicateMainLoop(conn net.Conn) {
+// 	reader := bufio.NewReader(conn)
+// 	line, _ := reader.Peek(100)
+// 	fmt.Println("replicate main loop line -> ", string(line))
+// 	for {
+// 		// parse incoming command from the master
+// 		inputCmd, err := parseCommand(reader)
+// 		fmt.Println("replicated parsed command ", inputCmd)
+// 		if err != nil {
+// 			fmt.Println("error reading command from master:", err)
+// 			break
+// 		}
+// 		fmt.Println("replicating main loop:", inputCmd)
+// 		//execute the command silently without responding
+// 		executeReplicatedCommand(s, inputCmd)
+// 	}
+// }
+
 func (s *Server) replicateMainLoop(conn net.Conn) {
 	reader := bufio.NewReader(conn)
-	line, _ := reader.Peek(100)
-	fmt.Println("replicate main loop line -> ", string(line))
+
 	for {
-		// parse incoming command from the master
-		inputCmd, err := parseCommand(reader)
-		fmt.Println("replicated parsed command ", inputCmd)
+		// Peek the first byte to check if we are reading an RDB file ($)
+		peek, err := reader.Peek(1)
 		if err != nil {
-			fmt.Println("error reading command from master:", err)
+			fmt.Println("Error peeking into connection:", err)
 			break
 		}
-		fmt.Println("replicating main loop:", inputCmd)
-		//execute the command silently without responding
+
+		// If the first character is '$', it indicates a Bulk String (likely the RDB file)
+		if peek[0] == '$' {
+			// Skip the RDB file
+			err := s.skipRDB(reader)
+			if err != nil {
+				fmt.Println("Error skipping RDB file:", err)
+				break
+			}
+			fmt.Println("RDB file transfer skipped.")
+			continue // After skipping RDB, proceed to handle commands
+		}
+
+		// Normal command parsing
+		inputCmd, err := parseCommand(reader)
+		if err != nil {
+			fmt.Println("Error reading command from master:", err)
+			break
+		}
+		fmt.Println("Replicated command received:", inputCmd)
+
+		// Execute the replicated command silently
 		executeReplicatedCommand(s, inputCmd)
 	}
 }
+
+// Function to skip the RDB file (ignoring it)
+func (s *Server) skipRDB(reader *bufio.Reader) error {
+	// Read the first line (which contains the length of the RDB file in bytes)
+	lengthLine, err := reader.ReadString('\n')
+	if err != nil {
+		return fmt.Errorf("error reading RDB length: %v", err)
+	}
+
+	// Extract the length from the line (ignore the leading '$')
+	length, err := strconv.Atoi(strings.TrimSpace(lengthLine[1:]))
+	if err != nil {
+		return fmt.Errorf("invalid RDB length: %v", err)
+	}
+
+	// Skip the RDB file content based on the given length
+	_, err = reader.Discard(length)
+	if err != nil {
+		return fmt.Errorf("error discarding RDB data: %v", err)
+	}
+
+	// Read the trailing \r\n after the RDB data
+	_, err = reader.ReadString('\n')
+	if err != nil {
+		return fmt.Errorf("error reading RDB trailing newline: %v", err)
+	}
+
+	// Successfully skipped the RDB file
+	return nil
+}
+
 
 func executeReplicatedCommand(s *Server, args []string) {
 	fmt.Println("execute replicated command")
