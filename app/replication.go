@@ -92,7 +92,7 @@ func (s *Server)HandShakeCommand() () {
 func (s *Server) replicateMainLoop(conn net.Conn) {
 	reader := bufio.NewReader(conn)
 	line, _ := reader.Peek(100)
-	fmt.Println("replicate main loop line -> ", line)
+	fmt.Println("replicate main loop line -> ", string(line))
 	for {
 		// parse incoming command from the master
 		inputCmd, err := parseCommand(reader)
