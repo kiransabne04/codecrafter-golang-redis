@@ -117,7 +117,7 @@ func executeReplicatedCommand(s *Server, c net.Conn, args []string) {
 	switch command {
 	case "SET":
 		// Process the SET command locally
-        response := s.SetCommand(c, args[1:])
+        response := s.SetCommand(c, args)
 		fmt.Println("replicating set command ->::::", response)
 		s.propagateCommandToReplica(command, args)
 	case "DEL":
