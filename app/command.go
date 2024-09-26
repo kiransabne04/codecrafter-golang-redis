@@ -157,7 +157,9 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	fmt.Println("RDB file sent successfully")
 
 	s.ConnectedReplica = c
-	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica.RemoteAddr(), s.ConnectedReplica.LocalAddr())
+	s.Replica[c] = true
+	
+	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica.RemoteAddr(), s.ConnectedReplica.LocalAddr(), s.Replica)
 	return ""
 	//return s.fullSync(c)
 }
@@ -282,10 +284,21 @@ func (s *Server) propagateCommandToReplica(command string, args []string) {
 	}
 	fmt.Println("cmd -> ", cmd, args)
 	//send the comand to replica
-	_, err := s.ConnectedReplica.Write([]byte(cmd))
-	if err != nil {
-		fmt.Println("Error sending command to replica")
-		return
+	// _, err := s.ConnectedReplica.Write([]byte(cmd))
+	// if err != nil {
+	// 	fmt.Println("Error sending command to replica")
+	// 	return
+	// }
+
+	//propagate commands to all connected replicas
+	for replica := range s.Replica{
+		fmt.Println("replica ->", replica, cmd)
+
+		_, err := replica.Write([]byte(cmd))
+		if err != nil {
+			fmt.Println("error sending command tio replica")
+			delete(s.Replica, replica) //remove replica if connection is not their
+		}
 	}
 	fmt.Printf("Propagated command to replica %s %v\n", command, args)
 }

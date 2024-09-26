@@ -33,6 +33,7 @@ type Server struct {
 	MasterHost string
 	MasterPort string
 	ConnectedReplica	net.Conn
+	Replica	map[net.Conn]bool
 }
 
 // serverstats struct contains the stats of the server, like connectioncounts, commands processed etc.
@@ -57,8 +58,7 @@ func NewServer() *Server {
 
 	server.Stats = ServerStats{}
 	server.DataStore = make(map[string]*Record)
-	// server.MasterReplid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
-	// server.MasterReplOffset = 0
+	server.Replica = make(map[net.Conn]bool)
 	return server
 }
 
@@ -100,20 +100,6 @@ func (s *Server) startServer (host, port, replicaof string) error {
 			continue
 		}
 		go s.handleConn(conn)
-		// go func (c net.Conn)  {
-		// 	reader := bufio.NewReader(c)
-		// 	line, _ := reader.Peek(4) // peek at first few bytes of the connection
-
-		// 	// If the connection is from a replica (expecting PSYNC), start the handshake
-		// 	if string(line) == "PSYN" {
-		// 		fmt.Println("Replica connection detected, starting handshake.")
-		// 		s.HandShakeCommand(c)
-		// 	} else {
-		// 		// Otherwise, assume it's a client connection
-		// 		fmt.Println("Client connection detected, processing commands.")
-		// 		s.handleConn(c)
-		// 	}
-		// }(conn)
 		
 	}
 
@@ -149,14 +135,13 @@ func (s *Server) handleConn(conn net.Conn) {
 				fmt.Println("Invalid command received")
 				conn.Write([]byte("-ERR invalid commands \r\n"))
 			}
+			delete(s.Replica, conn) // If the connection is from a replica, remove it from the replicas list
 			break
 		}
 		fmt.Println("inputCmd -> ", inputCmd, err)
 		// csacascas
 		fmt.Println(inputCmd[0] == "PSYNC")
-		// if inputCmd[0] == "PSYNC" {
-		// 	s.HandShakeCommand(conn)
-		// }
+	
 		response  := executeCommand(s, conn, inputCmd)
 		_, err = conn.Write([]byte(response))
 		if err != nil {
