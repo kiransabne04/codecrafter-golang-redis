@@ -17,7 +17,7 @@ func (s *Server)HandShakeCommand() () {
 	}
 	// m := c
 	//s.ConnectedReplica = m
-	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
+	//fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
 	//defer m.Close()
 	// sned PING to the master
 
@@ -82,7 +82,9 @@ func (s *Server)HandShakeCommand() () {
 	}
 
 	fmt.Println("recevied PSYNC response :", strings.TrimSpace(string(response)))
+	s.Replica[m] = true
 
+	fmt.Println("s.ConnectedReplica -> ", " :::: ", s.Replica)
 	s.replicateMainLoop(m)
 	//return &m, nil
 }
