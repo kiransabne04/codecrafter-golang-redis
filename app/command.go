@@ -193,21 +193,11 @@ func (s *Server) SetCommand(c net.Conn, args []string) string {
 
 	s.DataStore[key] = record
     fmt.Printf("SET command applied locally: key=%s, value=%s\n", key, value)
-	fmt.Println(s.DataStore)
 	// if s.ConnectedReplica != nil {
 	// 	fmt.Println("replica set command inside set method")
 	// 	s.propagateCommandToReplica("SET", args)
 	// }
-	// If called on the master, propagate to replicas (skip if called on replica)
-    if c != nil {
-        fmt.Println("Propagating SET command to replicas")
-        s.propagateCommandToReplica("SET", args)
-    }
-
-    // No response needed if called from the replica
-    if c == nil {
-        return ""
-    }
+	s.propagateCommandToReplica("SET", args)
 	return fmt.Sprintf("+OK\r\n")
 }
 
