@@ -93,6 +93,7 @@ func (s *Server) replicateMainLoop(conn net.Conn) {
 	for {
 		// parse incoming command from the master
 		inputCmd, err := parseCommand(reader)
+		fmt.Println("replicated parsed command ", inputCmd)
 		if err != nil {
 			fmt.Println("error reading command from master:", err)
 			break
