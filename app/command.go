@@ -160,7 +160,7 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	s.Replica[c] = true
 	
 	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica.RemoteAddr(), s.ConnectedReplica.LocalAddr(), s.Replica)
-	s.replicateMainLoop(c)
+	//s.replicateMainLoop(c)
 	return ""
 	//return s.fullSync(c)
 }
