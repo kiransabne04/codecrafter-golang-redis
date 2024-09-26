@@ -195,10 +195,11 @@ func (s *Server) SetCommand(c net.Conn, args []string) string {
 
 	s.DataStore[key] = record
 	fmt.Println("set commabd -> ", s.ConnectedReplica)
-	if s.ConnectedReplica != nil {
-		fmt.Println("replica set command inside set method")
-		s.propagateCommandToReplica("SET", args)
-	}
+	// if s.ConnectedReplica != nil {
+	// 	fmt.Println("replica set command inside set method")
+	// 	s.propagateCommandToReplica("SET", args)
+	// }
+	s.propagateCommandToReplica("SET", args)
 	return fmt.Sprintf("+OK\r\n")
 }
 
