@@ -157,6 +157,7 @@ func (s *Server)PsyncCommand(c net.Conn, args[] string) string {
 	fmt.Println("RDB file sent successfully")
 
 	s.ConnectedReplica = c
+	fmt.Println("s.ConnectedReplica -> ", s.ConnectedReplica.RemoteAddr(), s.ConnectedReplica.LocalAddr())
 	return ""
 	//return s.fullSync(c)
 }
