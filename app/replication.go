@@ -15,7 +15,7 @@ func (s *Server)HandShakeCommand() () {
 		fmt.Println("-ERR couldnt connect to master at "+ address )
 	}
 	// m := c
-	s.ConnectedReplica = m
+	//s.ConnectedReplica = m
 	fmt.Println("s.ConnectedReplica -> ", m.RemoteAddr())
 	//defer m.Close()
 	// sned PING to the master
