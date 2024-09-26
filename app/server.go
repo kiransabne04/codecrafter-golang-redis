@@ -90,10 +90,9 @@ func (s *Server) startServer (host, port, replicaof string) error {
 		s.MasterHost = masterHost
 		s.MasterPort = masterPort
 		fmt.Printf("Server running as slave connecting to master at %s:%s\n", masterHost, masterPort)
-		//s.HandShakeCommand()
+		s.HandShakeCommand()
 	}
 	
-
 	for {
 		conn, err := s.Listener.Accept()
 		if err != nil {
@@ -155,9 +154,9 @@ func (s *Server) handleConn(conn net.Conn) {
 		fmt.Println("inputCmd -> ", inputCmd, err)
 		// csacascas
 		fmt.Println(inputCmd[0] == "PSYNC")
-		if inputCmd[0] == "PSYNC" {
-			s.HandShakeCommand(conn)
-		}
+		// if inputCmd[0] == "PSYNC" {
+		// 	s.HandShakeCommand(conn)
+		// }
 		response  := executeCommand(s, conn, inputCmd)
 		_, err = conn.Write([]byte(response))
 		if err != nil {
